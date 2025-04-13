@@ -1,5 +1,5 @@
-import datetime
 import os
+from datetime import datetime, timezone
 
 import psycopg2
 from dotenv import load_dotenv
@@ -17,17 +17,21 @@ class DBClient:
             host=os.getenv('PG_HOST'), port=os.getenv('PG_PORT'), dbname=os.getenv('PG_DBNAME')
         )
         self.cursor = self.connection.cursor()
-        self.table = f'attempts_per_{datetime.date.today().strftime("%d_%m_%Y")}'
+        self.table = f'attempts_per_{datetime.now(timezone.utc).strftime("%d_%m_%Y")}'
 
     def create_table(self):
         query = f'''
         CREATE TABLE IF NOT EXISTS {self.table} (
         user_id TEXT, oauth_consumer_key TEXT, lis_result_sourcedid TEXT, 
         lis_outcome_service_url TEXT, is_correct SMALLINT, attempt_type TEXT, 
-        created_at TIMESTAMP)'''
+        created_at TIMESTAMP, CONSTRAINT unique_attempt UNIQUE (user_id, created_at, attempt_type))'''
         self.cursor.execute(query)
         self.connection.commit()
         self.logger.info(f'Таблица {self.table} создана или уже существует')
+
+    def __get_table_size(self):
+        self.cursor.execute(f'SELECT COUNT(*) FROM {self.table}')
+        return self.cursor.fetchone()[0]
 
     def insert_data(self, data):
         if not data:
@@ -39,13 +43,19 @@ class DBClient:
                    row['created_at']) for row in data]
         query = f'''
         INSERT INTO {self.table} (user_id, oauth_consumer_key, lis_result_sourcedid, 
-        lis_outcome_service_url, is_correct, attempt_type, created_at) VALUES %s'''
+        lis_outcome_service_url, is_correct, attempt_type, created_at) VALUES %s 
+        ON CONFLICT ON CONSTRAINT unique_attempt DO NOTHING'''
 
         try:
-            # self.cursor.execute(query, values)
+            start_table_size = self.__get_table_size()
+
             psycopg2.extras.execute_values(self.cursor, query, values)
             self.connection.commit()
-            self.logger.info(f'В таблицу {self.table} добавлено {len(data)} строк')
+
+            now_table_size = self.__get_table_size()
+            new_rows_count = now_table_size - start_table_size
+
+            self.logger.info(f'В таблицу {self.table} добавлено {new_rows_count} новых строк')
         except Exception as ex:
             self.connection.rollback()
             self.logger.error(f'Ошибка при добавлении данных: {str(ex)}')
