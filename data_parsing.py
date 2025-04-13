@@ -18,6 +18,9 @@ class DataParsing:
             self.logger.warning(f"Некорректный attempt_type: {record['attempt_type']}")
             return False
 
+        if record['is_correct'] not in (0, 1, None):
+            self.logger.warning(f'Некорректное значение is_correct: {record["is_correct"]}')
+
         return True
 
     def __passback_params_processing(self, record):

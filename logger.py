@@ -34,7 +34,7 @@ class Logger:
             try:
                 date_str = file[:-4]
                 log_date = datetime.strptime(date_str, '%Y-%m-%d')
-                if (now - log_date).days > self.days_of_interest:
+                if (now - log_date).days >= self.days_of_interest:
                     os.remove(os.path.join(self.directory, file))
             except ValueError:
                 continue
