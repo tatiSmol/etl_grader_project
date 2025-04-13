@@ -64,3 +64,4 @@ class DBClient:
         self.cursor.close()
         self.connection.close()
         self.logger.info('Соединение с базой данных закрыто')
+        self.logger.info('\n' + '=' * 60 + '\n')

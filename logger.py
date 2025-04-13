@@ -1,6 +1,5 @@
 import logging
 import os
-import time
 from datetime import datetime, timezone
 
 
@@ -24,7 +23,6 @@ class Logger:
         if not self.logger.handlers:
             handler = logging.FileHandler(path, encoding='utf-8')
             formatter = logging.Formatter('%(asctime)s %(levelname)s [%(name)s]: %(message)s')
-            formatter.converter = time.gmtime
             handler.setFormatter(formatter)
             self.logger.addHandler(handler)
 
