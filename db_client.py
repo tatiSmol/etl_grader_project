@@ -18,13 +18,14 @@ class DBClient:
         )
         self.cursor = self.connection.cursor()
         self.table = f'attempts_per_{datetime.now(timezone.utc).strftime("%d_%m_%Y")}'
+        self.constraint = f'con_{datetime.now(timezone.utc).strftime("%d_%m_%Y")}'
 
     def create_table(self):
         query = f'''
         CREATE TABLE IF NOT EXISTS {self.table} (
         user_id TEXT, oauth_consumer_key TEXT, lis_result_sourcedid TEXT, 
         lis_outcome_service_url TEXT, is_correct SMALLINT, attempt_type TEXT, 
-        created_at TIMESTAMP, CONSTRAINT unique_attempt UNIQUE (user_id, created_at, attempt_type))'''
+        created_at TIMESTAMP, CONSTRAINT {self.constraint} UNIQUE (user_id, created_at, attempt_type))'''
         self.cursor.execute(query)
         self.connection.commit()
         self.logger.info(f'Таблица {self.table} создана или уже существует')
@@ -44,7 +45,7 @@ class DBClient:
         query = f'''
         INSERT INTO {self.table} (user_id, oauth_consumer_key, lis_result_sourcedid, 
         lis_outcome_service_url, is_correct, attempt_type, created_at) VALUES %s 
-        ON CONFLICT ON CONSTRAINT unique_attempt DO NOTHING'''
+        ON CONFLICT ON CONSTRAINT {self.constraint} DO NOTHING'''
 
         try:
             start_table_size = self.__get_table_size()

@@ -31,7 +31,7 @@ class App:
 
             if self.daily_summary_needed:
                 summary = {
-                    'Дата': datetime.now(timezone.utc).strftime("%Y-%m-%d, %H:%m"),
+                    'Дата': datetime.now(timezone.utc).strftime("%Y-%m-%d, %H:%M"),
                     'Всего попыток': len(data_parsed),
                     'Успешных попыток': sum(1 for value in data_parsed if value['is_correct'] == 1),
                     'Уникальных пользователей': len(set(value['user_id'] for value in data_parsed)),
