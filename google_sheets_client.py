@@ -4,11 +4,14 @@ import gspread
 from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 
+from logger import Logger
+
 
 class GoogleSheetsClient:
-    def __init__(self, credentials_path, spreadsheet_name):
+    def __init__(self, credentials_path, spreadsheet_name, name='GoogleSheetsClient'):
         self.credentials_path = credentials_path
         self.spreadsheet_name = spreadsheet_name
+        self.logger = Logger(name).get_logger()
 
         self.scopes = [
             'https://www.googleapis.com/auth/spreadsheets',
@@ -33,6 +36,7 @@ class GoogleSheetsClient:
         worksheet.append_row(headers)
         worksheet.append_row(values)
         self.__auto_resize_columns(sheet.id, worksheet._properties['sheetId'], len(summary_data))
+        self.logger.info('Данные загружены в Google Sheets')
 
     def __auto_resize_columns(self, spreadsheet_id, sheet_id, col_count):
         req_body = {'requests': [

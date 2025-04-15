@@ -59,7 +59,7 @@ class DBClient:
             self.logger.info(f'В таблицу {self.table} добавлено {new_rows_count} новых строк')
         except Exception as ex:
             self.connection.rollback()
-            self.logger.error(f'Ошибка при добавлении данных: {str(ex)}')
+            self.logger.error(f'Ошибка при добавлении данных: {ex}')
 
     def close_connection(self):
         self.cursor.close()

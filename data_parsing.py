@@ -35,7 +35,7 @@ class DataParsing:
                     return None
             return params_dict
         except Exception as ex:
-            self.logger.warning(f'Ошибка при обработке поля passback_params: {ex}')
+            self.logger.error(f'Ошибка при обработке поля passback_params: {ex}')
 
     def process(self, input_data):
         output_data = []
